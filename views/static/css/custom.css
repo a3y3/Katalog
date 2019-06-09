@@ -1,3 +1,13 @@
 .logout{
 	display: none;
 }
+
+.btn-primary{
+	background-color: #ff2a6b;
+	border-color: #ff2a6b;
+}
+
+.btn-primary:hover{
+	background-color: #ff2a6b;
+	border-color: #ff2a6b;
+}

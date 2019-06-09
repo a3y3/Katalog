@@ -1,0 +1,23 @@
+{%include 'html_start.html'%}
+<!-- Footer widgets section -->
+<section class="bottom-widgets-section spad">
+	<div class="container">
+		<h3>
+			Catalogs | <a href="{{url_for('create_catalog')}}">Create new</a>
+		</h3>
+		<div class="row">
+			{%for catalog in catalogs%}
+				<div class="col-lg-4">
+					<div class="sp-blog-item">
+						<div class="blog-text">
+							<h5>{{catalog.name}}</h5>
+							<a href="{{url_for('show_catalog', catalog_id=catalog.id)}}" class="readmore"><i class="fa fa-angle-right"></i></a>
+						</div>
+					</div>
+				</div>
+			{%endfor%}
+		</div>
+	</div>
+</section>
+<!-- Footer widgets section end -->
+{%include 'html_end.html'%}

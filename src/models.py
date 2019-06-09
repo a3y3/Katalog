@@ -7,7 +7,7 @@ Base = declarative_base()
 
 
 class User(Base):
-    __tableaname__ = 'uses'
+    __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
     email = Column(String(250), nullable=False, index=True)
@@ -34,5 +34,5 @@ class Item(Base):
     user = relationship(User)
 
 
-engine = create_engine('sqlite:///restaurantmenu.db')
+engine = create_engine('postgres:///catalog')
 Base.metadata.create_all(engine)
