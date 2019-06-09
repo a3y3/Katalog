@@ -15,3 +15,8 @@
 .no-display{
 	display: none;
 }
+
+.center{
+	margin: auto;
+  width: 50%;
+}

@@ -7,14 +7,14 @@
 				<a href="https://www.linkedin.com/in/soham-dongargaonkar/"target="_blank"><i class="fa fa-linkedin"></i></a>
 			</div>
 			<div class="user-panel">
-				<div class="g-signin2" id="signin" data-onsuccess="onSignIn"></div>
+				<div id="signin"><a href="{{url_for('login')}}">Sign In / Register</a></div>
 				<div class="no-display" id="signout"><a href="#" onclick="signOut();">Sign out</a></div>
 			</div>
 		</div>
 	</div>
 	<div class="header-bottom">
 		<div class="container">
-			<a href="index.html" class="site-logo">
+			<a href="/" class="site-logo">
 				<img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
 			</a>
 			<div class="nav-switch">

@@ -7,12 +7,25 @@ from models import Base, User, Item, Catalog
 from google.oauth2 import id_token
 from google.auth.transport import requests
 
+import random
+import string
+import json
+
 app = Flask(__name__, template_folder='../views',
             static_folder='../views/static')
 
 engine = create_engine('postgres:///catalog')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
+
+
+# =========CSRF=============
+def create_state():
+    state = ''.join(
+        random.choice(string.ascii_uppercase + string.ascii_lowercase)
+        for x in range(32))
+    login_session['state'] = state
+    return state
 
 
 # =========Index=============
@@ -87,8 +100,11 @@ def show_item(item_id):
 
 
 # =========Login=============
-@app.route('/login', methods=["POST", "DELETE"])
+@app.route('/login', methods=["GET", "POST", "DELETE"])
 def login():
+    if request.method == "GET":
+        state = create_state()
+        return render_template('login/new.html')
     if request.method == "POST":
         pass
     elif request.method == "DELETE":
@@ -97,4 +113,8 @@ def login():
 
 if __name__ == '__main__':
     app.debug = True
+    secret_key = \
+    json.loads(open('../secrets/app_secrets.json', 'r').read())['app'][
+        'secret']
+    app.secret_key = secret_key
     app.run(host='0.0.0.0', port=5000)
