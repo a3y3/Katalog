@@ -18,3 +18,32 @@
 </section>
 <!-- Footer widgets section end -->
 {%include 'html_end.html'%}
+<script type="text/javascript">
+	function onSignIn(googleUser) {
+	  $('#signin').addClass('no-display');
+	  $('#signout').removeClass('no-display')
+	  var id_token = googleUser.getAuthResponse().id_token;
+	  $.ajax({
+            url: '/login',
+            type: 'POST',
+            data: {
+                token: id_token,
+                state: "{{state}}"
+            },
+            dataType: 'JSON',
+            success: function (data) {
+                window.open("/", target="_self");
+            },
+            failure: function (data) {
+                alert("Something went wrong" + data);
+            }
+        });
+	}
+
+	function signOut(){
+		var auth2 = gapi.auth2.getAuthInstance();
+		auth2.signOut().then(function () {
+    	location.reload();
+  	});
+	}
+</script>

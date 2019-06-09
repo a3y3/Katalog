@@ -7,8 +7,11 @@
 				<a href="https://www.linkedin.com/in/soham-dongargaonkar/"target="_blank"><i class="fa fa-linkedin"></i></a>
 			</div>
 			<div class="user-panel">
-				<div id="signin"><a href="{{url_for('login')}}">Sign In / Register</a></div>
-				<div class="no-display" id="signout"><a href="#" onclick="signOut();">Sign out</a></div>
+				{%if session['idinfo']%}
+					<div id="signout"><a href="#" onclick="signOut();">Sign out</a></div>
+				{%else%}
+					<div id="signin"><a href="{{url_for('login')}}">Sign In / Register</a></div>
+				{%endif%}
 			</div>
 		</div>
 	</div>
@@ -29,33 +32,22 @@
 	</div>
 </header>
 <!-- Header section end -->
-
 <script type="text/javascript">
-	function onSignIn(googleUser) {
-	  $('#signin').addClass('no-display');
-	  $('#signout').removeClass('no-display')
-	  var id_token = googleUser.getAuthResponse().id_token;
-	  $.ajax({
+	function signOut(){
+		var auth2 = gapi.auth2.getAuthInstance();
+    auth2.signOut().then(function () {
+      console.log('User signed out.');
+    });
+		$.ajax({
             url: '/login',
-            type: 'POST',
-            data: {
-                token: id_token,
-                state: "{{STATE}}"
-            },
+            type: 'DELETE',
             dataType: 'JSON',
             success: function (data) {
-                location.reload();
+                window.open("/", target="_self");
             },
             failure: function (data) {
                 alert("Something went wrong" + data);
             }
         });
-	}
-
-	function signOut(){
-		var auth2 = gapi.auth2.getAuthInstance();
-		auth2.signOut().then(function () {
-    	location.reload();
-  	});
 	}
 </script>
