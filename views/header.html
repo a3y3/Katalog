@@ -1,37 +1,32 @@
-	<!-- Header section -->
-	<header class="header-section">
-		<div class="header-top">
-			<div class="container">
-				<div class="header-social">
-					<a href="#"><i class="fa fa-pinterest"></i></a>
-					<a href="#"><i class="fa fa-facebook"></i></a>
-					<a href="#"><i class="fa fa-twitter"></i></a>
-					<a href="#"><i class="fa fa-dribbble"></i></a>
-					<a href="#"><i class="fa fa-behance"></i></a>
-					<a href="#"><i class="fa fa-linkedin"></i></a>
-				</div>
-				<div class="user-panel">
-					<a href="#">Register</a> / 
-					<a href="#">Login</a>
-				</div>
+<!-- Header section -->
+<header class="header-section">
+	<div class="header-top">
+		<div class="container">
+			<div class="header-social">
+				<a href="https://github.com/a3y3/Katalog"><i class="fa fa-github"></i></a>
+				<a href="https://www.linkedin.com/in/soham-dongargaonkar/"><i class="fa fa-linkedin"></i></a>
+			</div>
+			<div class="user-panel">
+				<a href="#" class="login">Register</a> /
+				<a href="#" class="login">Login</a>
+				<a href="#" class="logout">Logout</a>
 			</div>
 		</div>
-		<div class="header-bottom">
-			<div class="container">
-				<a href="index.html" class="site-logo">
-					<img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
-				</a>
-				<div class="nav-switch">
-					<i class="fa fa-bars"></i>
-				</div>
-				<ul class="main-menu">
-					<li><a href="index.html">Home</a></li>
-					<li><a href="about.html">Features</a></li>
-					<li><a href="recipes.html">Receipies</a></li>
-					<li><a href="#">Reviews</a></li>
-					<li><a href="contact.html">Contact</a></li>
-				</ul>
+	</div>
+	<div class="header-bottom">
+		<div class="container">
+			<a href="index.html" class="site-logo">
+				<img src="{{ url_for('static', filename='img/logo.png') }}" alt="">
+			</a>
+			<div class="nav-switch">
+				<i class="fa fa-bars"></i>
 			</div>
+			<ul class="main-menu">
+				<li><a href="/">Home</a></li>
+				<li><a href="/catalogs">Catalogs</a></li>
+				<li><a href="/items">Items</a></li>
+			</ul>
 		</div>
-	</header>
-	<!-- Header section end -->
+	</div>
+</header>
+<!-- Header section end -->
