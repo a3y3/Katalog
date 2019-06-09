@@ -104,7 +104,9 @@ def show_item(item_id):
 def login():
     if request.method == "GET":
         state = create_state()
-        return render_template('login/new.html')
+        client_id = json.loads(open('../secrets/app_secrets.json', 'r').read())['web'][
+            'google']['client_id']
+        return render_template('login/new.html', client_id=client_id)
     if request.method == "POST":
         pass
     elif request.method == "DELETE":
