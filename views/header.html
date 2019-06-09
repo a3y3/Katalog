@@ -3,13 +3,12 @@
 	<div class="header-top">
 		<div class="container">
 			<div class="header-social">
-				<a href="https://github.com/a3y3/Katalog"><i class="fa fa-github"></i></a>
-				<a href="https://www.linkedin.com/in/soham-dongargaonkar/"><i class="fa fa-linkedin"></i></a>
+				<a href="https://github.com/a3y3/Katalog" target="_blank"><i class="fa fa-github"></i></a>
+				<a href="https://www.linkedin.com/in/soham-dongargaonkar/"target="_blank"><i class="fa fa-linkedin"></i></a>
 			</div>
 			<div class="user-panel">
-				<a href="#" class="login">Register</a> /
-				<a href="#" class="login">Login</a>
-				<a href="#" class="logout">Logout</a>
+				<div class="g-signin2" id="signin" data-onsuccess="onSignIn"></div>
+				<div class="no-display" id="signout"><a href="#" onclick="signOut();">Sign out</a></div>
 			</div>
 		</div>
 	</div>
@@ -30,3 +29,33 @@
 	</div>
 </header>
 <!-- Header section end -->
+
+<script type="text/javascript">
+	function onSignIn(googleUser) {
+	  $('#signin').addClass('no-display');
+	  $('#signout').removeClass('no-display')
+	  var id_token = googleUser.getAuthResponse().id_token;
+	  $.ajax({
+            url: '/login',
+            type: 'POST',
+            data: {
+                token: id_token,
+                state: "{{STATE}}"
+            },
+            dataType: 'JSON',
+            success: function (data) {
+                location.reload();
+            },
+            failure: function (data) {
+                alert("Something went wrong" + data);
+            }
+        });
+	}
+
+	function signOut(){
+		var auth2 = gapi.auth2.getAuthInstance();
+		auth2.signOut().then(function () {
+    	location.reload();
+  	});
+	}
+</script>

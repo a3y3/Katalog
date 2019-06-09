@@ -18,7 +18,7 @@ class Catalog(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     user = relationship(User)
 
 
@@ -28,9 +28,9 @@ class Item(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
     description = Column(String(250))
-    catalog_id = Column(Integer, ForeignKey('catalogs.id'))
+    catalog_id = Column(Integer, ForeignKey('catalogs.id'), nullable=False)
     catalog = relationship(Catalog)
-    user_id = Column(Integer, ForeignKey('users.id'))
+    user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     user = relationship(User)
 
 

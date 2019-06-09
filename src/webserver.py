@@ -64,9 +64,7 @@ def items():
         name = request.form['name']
         description = request.form['description']
         catalog_id = request.form['catalog_id']
-        user_id = request.form['user_id']
-        item = Item(name=name, description=description, catalog_id=catalog_id,
-                    user_id=user_id)
+        item = Item(name=name, description=description, catalog_id=catalog_id)
         session.add(item)
         session.commit()
         session.close()
@@ -75,7 +73,9 @@ def items():
 
 @app.route('/items/new/')
 def new_item():
-    return render_template('items/new.html')
+    session = DBSession()
+    catalogs = session.query(Catalog).all()
+    return render_template('items/new.html', catalogs=catalogs)
 
 
 @app.route('/items/<int:item_id>')
@@ -84,6 +84,15 @@ def show_item(item_id):
     item = session.query(Item).filter_by(item_id=item_id).one()
     session.close()
     return render_template('items/show.html', item=item)
+
+
+# =========Login=============
+@app.route('/login', methods=["POST", "DELETE"])
+def login():
+    if request.method == "POST":
+        pass
+    elif request.method == "DELETE":
+        pass
 
 
 if __name__ == '__main__':
