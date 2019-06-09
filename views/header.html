@@ -32,6 +32,24 @@
 	</div>
 </header>
 <!-- Header section end -->
+
+<!-- Flash messages begin -->
+{%with flash_messages = get_flashed_messages()%}
+{%if flash_messages%}
+	<ul>
+		{%for flash_message in flash_messages%}
+			<li>
+				<div class="alert alert-success" role="alert">
+          <button class="close" data-dismiss="alert"></button>
+          <strong>Notice: </strong>{{flash_message}}
+        </div>
+      </li>
+		{%endfor%}
+	</ul>
+{%endif%}
+{%endwith%}
+<!-- Flash messages end -->
+
 <script type="text/javascript">
 	function signOut(){
 		var auth2 = gapi.auth2.getAuthInstance();

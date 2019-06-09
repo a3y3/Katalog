@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, \
-    session
+    session, flash
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -18,6 +18,9 @@ engine = create_engine('postgres:///catalog')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
+# =========Constants=============
+MUST_SIGNED_IN = "You need to sign in before you perform that action."
+
 
 # =========CSRF=============
 def create_state():
@@ -27,7 +30,7 @@ def create_state():
     """
     state = ''.join(
         random.choice(string.ascii_uppercase + string.ascii_lowercase)
-        for x in range(32))
+        for _ in range(32))
     session['state'] = state
     return state
 
@@ -42,6 +45,18 @@ def valid_state():
         print("CSRF mismatch", received_state, "!=", session['state'])
         return False
     return True
+
+
+# =========User=============
+def create_user():
+    email = session['idinfo']['email']
+    db_session = DBSession()
+    user = db_session.query(User).filter_by(email=email).first()
+    if user is None:
+        user = User(email=email)
+        db_session.add(user)
+        db_session.commit()
+    db_session.close()
 
 
 # =========Index=============
@@ -64,9 +79,9 @@ def catalogs():
     """
     if request.method == "GET":
         db_session = DBSession()
-        catalogs = db_session.query(Catalog).all()
+        catalogs_all = db_session.query(Catalog).all()
         db_session.close()
-        return render_template('catalogs/catalogs.html', catalogs=catalogs)
+        return render_template('catalogs/catalogs.html', catalogs=catalogs_all)
     elif request.method == "POST":
         db_session = DBSession()
         name = request.form['name']
@@ -84,6 +99,9 @@ def new_catalog():
     Shows the form for creating a new catalog
     :return: the appropriate template.
     """
+    if not is_signed_in():
+        flash(MUST_SIGNED_IN)
+        return redirect(request.referrer)
     return render_template('catalogs/new.html')
 
 
@@ -95,9 +113,10 @@ def show_catalog(catalog_id):
     :return: the appropriate template.
     """
     db_session = DBSession()
-    items = db_session.query(Item).filter_by(catalog_id=catalog_id).all()
+    items_catalog = db_session.query(Item).filter_by(
+        catalog_id=catalog_id).all()
     db_session.close()
-    return render_template('catalogs/show.html', items=items,
+    return render_template('catalogs/show.html', items=items_catalog,
                            catalog_id=catalog_id)
 
 
@@ -112,9 +131,9 @@ def items():
     print('idinfo' in session)
     if request.method == "GET":
         db_session = DBSession()
-        items = db_session.query(Item).all()
+        items_all = db_session.query(Item).all()
         db_session.close()
-        return render_template('items/items.html', items=items)
+        return render_template('items/items.html', items=items_all)
     elif request.method == "POST":
         db_session = DBSession()
         name = request.form['name']
@@ -135,9 +154,9 @@ def new_item():
     :return: the appropriate template.
     """
     db_session = DBSession()
-    catalogs = db_session.query(Catalog).all()
+    catalogs_all = db_session.query(Catalog).all()
     db_session.close()
-    return render_template('items/new.html', catalogs=catalogs)
+    return render_template('items/new.html', catalogs=catalogs_all)
 
 
 @app.route('/items/<int:item_id>')
@@ -189,15 +208,21 @@ def login():
             session['idinfo'] = None
             return json.dumps({'success': False}), 401, {
                 'ContentType': 'application/json'}
+        create_user()
         return json.dumps({'success': True}), 200, {
             'ContentType': 'application/json'}
 
     elif request.method == "DELETE":
         session['idinfo'] = None
         return json.dumps({'success': True}), 200, {
-                'ContentType': 'application/json'}
+            'ContentType': 'application/json'}
 
 
+def is_signed_in():
+    return session['idinfo'] is not None
+
+
+# =========Main=============
 if __name__ == '__main__':
     app.debug = True
     secret_key = \
