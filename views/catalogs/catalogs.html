@@ -6,11 +6,12 @@
 			Catalogs | <a href="{{url_for('new_catalog')}}">Create new</a>
 		</h3>
 		<div class="row">
-			{%for catalog in catalogs%}
-				<div class="col-lg-3">
+			{%for catalog, user in catalogs%}
+				<div class="col-lg-4">
 					<div class="sp-blog-item">
 						<div class="blog-text">
 							<h5>{{catalog.name}}</h5>
+							<span>By: {{user.email}}</span>
 							<a href="{{url_for('show_catalog', catalog_id=catalog.id)}}" class="readmore"><i class="fa fa-angle-right"></i></a>
 						</div>
 					</div>

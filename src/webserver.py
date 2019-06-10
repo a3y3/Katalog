@@ -49,6 +49,11 @@ def valid_state():
 
 # =========User=============
 def create_user():
+    """
+    Creates a new User if one doesn't exist yet. Lookup is performed against
+    User.email
+    :return: None
+    """
     email = session['idinfo']['email']
     db_session = DBSession()
     user = db_session.query(User).filter_by(email=email).first()
@@ -64,9 +69,12 @@ def create_user():
 def index():
     """
     Displays the index page, which lists some items on the home screen.
-    :return:
+    :return: the appropriate template.
     """
-    return render_template('index.html')
+    db_sesssion = DBSession()
+    items_three = db_sesssion.query(Item, Catalog, User).limit(3)
+    db_sesssion.close()
+    return render_template('index.html', items=items_three)
 
 
 # =========Catalogs=============
@@ -75,22 +83,23 @@ def catalogs():
     """
     GET: Shows all the catalogs available
     POST: Creates a new catalog
-    :return: template (if GET) and a JSON dump on POST.
+    :return: template (if GET) and a redirect to catalogs on POST.
     """
     if request.method == "GET":
         db_session = DBSession()
-        catalogs_all = db_session.query(Catalog).all()
+        catalogs_all = db_session.query(Catalog, User).join(User).all()
         db_session.close()
         return render_template('catalogs/catalogs.html', catalogs=catalogs_all)
     elif request.method == "POST":
         db_session = DBSession()
         name = request.form['name']
-        catalog = Catalog(name=name)
+        email = session['idinfo']['email']
+        user = db_session.query(User).filter_by(email=email).first()
+        catalog = Catalog(name=name, user_id=user.id)
         db_session.add(catalog)
         db_session.commit()
         db_session.close()
-        return json.dumps({'success': True}), 200, {
-            'ContentType': 'application/json'}
+        return redirect('catalogs')
 
 
 @app.route('/catalogs/new/')
@@ -113,7 +122,7 @@ def show_catalog(catalog_id):
     :return: the appropriate template.
     """
     db_session = DBSession()
-    items_catalog = db_session.query(Item).filter_by(
+    items_catalog = db_session.query(Item, Catalog, User).filter_by(
         catalog_id=catalog_id).all()
     db_session.close()
     return render_template('catalogs/show.html', items=items_catalog,
@@ -126,12 +135,12 @@ def items():
     """
     GET: Shows all items
     POST: Creates a new item.
-    :return: GET: the appropriate template, POST: JSON dump of success
+    :return: GET: the appropriate template, POST: redirect to items
     """
     print('idinfo' in session)
     if request.method == "GET":
         db_session = DBSession()
-        items_all = db_session.query(Item).all()
+        items_all = db_session.query(Item, Catalog, User).all()
         db_session.close()
         return render_template('items/items.html', items=items_all)
     elif request.method == "POST":
@@ -139,12 +148,14 @@ def items():
         name = request.form['name']
         description = request.form['description']
         catalog_id = request.form['catalog_id']
-        item = Item(name=name, description=description, catalog_id=catalog_id)
+        email = session['idinfo']['email']
+        user = db_session.query(User).filter_by(email=email).first()
+        item = Item(name=name, description=description, catalog_id=catalog_id,
+                    user_id=user.id)
         db_session.add(item)
         db_session.commit()
         db_session.close()
-        return json.dumps({'success': True}), 200, {
-            'ContentType': 'application/json'}
+        return redirect('items')
 
 
 @app.route('/items/new/')
@@ -167,9 +178,10 @@ def show_item(item_id):
     :return: the appropriate template.
     """
     db_session = DBSession()
-    item = db_session.query(Item).filter_by(item_id=item_id).one()
+    item, user = db_session.query(Item, User).join(User).filter_by(
+        id=item_id).one()
     db_session.close()
-    return render_template('items/show.html', item=item)
+    return render_template('items/show.html', item=item, user=user)
 
 
 # =========Login=============

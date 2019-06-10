@@ -3,23 +3,24 @@
 <section class="bottom-widgets-section spad">
 	<div class="container">
 		<div class="row">
-		{%for item in items%}
-			<div class="col-lg-4">
-				<div class="sp-blog-item">
-					<div class="blog-thubm">
-						<div class="blog-date">
-							<span>May 04, 2018</span>
+		{%for item, catalog, user in items%}
+				<div class="col-lg-4">
+					<div class="sp-blog-item">
+						<div class="blog-thubm">
+							<div class="blog-date">
+								<span>May 04, 2018</span>
+							</div>
 						</div>
-					</div>
-					<div class="blog-text">
+						<div class="blog-text">
 							<h5>{{item.name}}</h5>
-							<span>By {{item.user.email}}</span>
+							<span><a href="{{url_for('show_catalog', catalog_id=catalog.id)}}">{{catalog.name}}</a></span>
+							<span>By {{user.email}}</span>
 							<p>{{item.description}}</p>
-							<a href="#" class="readmore"><i class="fa fa-angle-right"></i></a>
+							<a href="{{url_for('show_item', item_id=item.id)}}" class="readmore"><i class="fa fa-angle-right"></i></a>
 						</div>
 					</div>
-			</div>
-		{%endfor%}
+				</div>
+			{%endfor%}
 		</div>
 	</div>
 </section>
