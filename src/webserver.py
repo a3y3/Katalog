@@ -72,7 +72,7 @@ def index():
     :return: the appropriate template.
     """
     db_sesssion = DBSession()
-    items_three = db_sesssion.query(Item, Catalog, User).limit(3)
+    items_three = db_sesssion.query(Item).limit(3)
     db_sesssion.close()
     return render_template('index.html', items=items_three)
 
@@ -99,7 +99,7 @@ def catalogs():
         db_session.add(catalog)
         db_session.commit()
         db_session.close()
-        return redirect('catalogs')
+        return redirect(url_for('catalogs'))
 
 
 @app.route('/catalogs/new/')
@@ -140,7 +140,7 @@ def items():
     print('idinfo' in session)
     if request.method == "GET":
         db_session = DBSession()
-        items_all = db_session.query(Item, Catalog, User).all()
+        items_all = db_session.query(Item, Catalog, User).join(Catalog, User)
         db_session.close()
         return render_template('items/items.html', items=items_all)
     elif request.method == "POST":
@@ -155,7 +155,7 @@ def items():
         db_session.add(item)
         db_session.commit()
         db_session.close()
-        return redirect('items')
+        return redirect(url_for('items'))
 
 
 @app.route('/items/new/')

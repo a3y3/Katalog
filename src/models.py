@@ -12,6 +12,9 @@ class User(Base):
     id = Column(Integer, primary_key=True)
     email = Column(String(250), nullable=False, index=True)
 
+    catalogs = relationship("Catalog", back_populates="user")
+    items = relationship("Item", back_populates="user")
+
 
 class Catalog(Base):
     __tablename__ = 'catalogs'
@@ -19,7 +22,9 @@ class Catalog(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String(250), nullable=False)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    user = relationship(User)
+
+    user = relationship("User", back_populates="catalogs")
+    items = relationship("Item", back_populates="catalog")
 
 
 class Item(Base):
@@ -29,9 +34,10 @@ class Item(Base):
     name = Column(String(80), nullable=False)
     description = Column(String(250))
     catalog_id = Column(Integer, ForeignKey('catalogs.id'), nullable=False)
-    catalog = relationship(Catalog)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
-    user = relationship(User)
+
+    user = relationship(User, back_populates="items")
+    catalog = relationship(Catalog, back_populates="items")
 
 
 engine = create_engine('postgres:///catalog')
