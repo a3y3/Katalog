@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, \
-    session, flash
+    session, flash, Markup
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -19,7 +19,8 @@ Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 # =========Constants=============
-MUST_SIGNED_IN = "You need to sign in before you perform that action."
+MUST_SIGNED_IN = "You need to <a href=/login>sign in </a> " \
+                 "before you perform that action."
 
 
 # =========CSRF=============
@@ -38,7 +39,7 @@ def create_state():
 def valid_state():
     """
     Checks if the received CSRF token matches the one in session.
-    :return:
+    :return: True if the state is valid, False if there's a CSRF token mismatch.
     """
     received_state = request.form['state']
     if received_state != session['state']:
@@ -47,11 +48,11 @@ def valid_state():
     return True
 
 
-# =========User=============
+# =========Users=============
 def create_user():
     """
     Creates a new User if one doesn't exist yet. Lookup is performed against
-    User.email
+    User.email, an indexed column.
     :return: None
     """
     email = session['idinfo']['email']
@@ -87,9 +88,9 @@ def catalogs():
     """
     if request.method == "GET":
         db_session = DBSession()
-        catalogs_all = db_session.query(Catalog, User).join(User).all()
+        catalogs_all = db_session.query(Catalog, User).join(User.catalogs)
         db_session.close()
-        return render_template('catalogs/catalogs.html', catalogs=catalogs_all)
+        return render_template('catalogs/catalogs.html', tuple=catalogs_all)
     elif request.method == "POST":
         db_session = DBSession()
         name = request.form['name']
@@ -109,7 +110,7 @@ def new_catalog():
     :return: the appropriate template.
     """
     if not is_signed_in():
-        flash(MUST_SIGNED_IN)
+        flash(Markup(MUST_SIGNED_IN))
         return redirect(request.referrer)
     return render_template('catalogs/new.html')
 
@@ -225,13 +226,27 @@ def login():
             'ContentType': 'application/json'}
 
     elif request.method == "DELETE":
-        session['idinfo'] = None
+        session.pop("idinfo")
         return json.dumps({'success': True}), 200, {
             'ContentType': 'application/json'}
 
 
 def is_signed_in():
-    return session['idinfo'] is not None
+    return 'idinfo' in session
+
+
+# =========Test Routes=============
+@app.route('/debug/test')
+def test():
+    email = session['idinfo']['email']
+    db_session = DBSession()
+    user = db_session.query(User).filter_by(email=email).first()
+    catalogs_all = user.catalogs
+    output = ""
+    for c in catalogs_all:
+        output += c.name
+    db_session.close()
+    return output
 
 
 # =========Main=============

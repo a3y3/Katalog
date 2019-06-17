@@ -8,6 +8,7 @@
 			</div>
 			<div class="user-panel">
 				{%if session['idinfo']%}
+					<span>{{session['idinfo'].email}}</span>
 					<div id="signout"><a href="#" onclick="signOut();">Sign out</a></div>
 				{%else%}
 					<div id="signin"><a href="{{url_for('login')}}">Sign In / Register</a></div>
