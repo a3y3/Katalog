@@ -14,9 +14,9 @@
 					</div>
 					<div class="blog-text">
 						<h5>{{item.name}}</h5>
+						<span><a href="{{url_for('show_catalog', catalog_id=catalog.id)}}">{{catalog.name}}</a></span>
 						<span>By {{user.email}}</span>
 						<p>{{item.description}}</p>
-						<a href="{{url_for('show_item', item_id=item.id)}}" class="readmore"><i class="fa fa-angle-right"></i></a>
 					</div>
 				</div>
 			</div>

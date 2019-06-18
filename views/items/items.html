@@ -1,1 +1,12 @@
-{%include 'items.html'%}
+{%include 'html_start.html'%}
+<!-- Footer widgets section -->
+<section class="bottom-widgets-section spad">
+	<div class="container">
+		<h3>
+		Items | <a href="{{url_for('new_item')}}">Add new</a>
+		</h3>
+		{%include 'items_generic.html'%}
+	</div>
+</section>
+<!-- Footer widgets section end -->
+{%include 'html_end.html'%}

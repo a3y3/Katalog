@@ -20,3 +20,16 @@
 	margin: auto;
   width: 50%;
 }
+
+.blog-date{
+	z-index: 5;
+	display: none;
+}
+
+.items-ellipsis{
+	height: 29px;
+	width: 100%;
+	white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

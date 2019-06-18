@@ -73,9 +73,10 @@ def index():
     :return: the appropriate template.
     """
     db_sesssion = DBSession()
-    items_three = db_sesssion.query(Item).limit(3)
+    items_three = db_sesssion.query(Catalog, Item, User).join(
+        Item.catalog).join(Item.user).limit(3)
     db_sesssion.close()
-    return render_template('index.html', items=items_three)
+    return render_template('index.html', tuple=items_three)
 
 
 # =========Catalogs=============
@@ -88,7 +89,7 @@ def catalogs():
     """
     if request.method == "GET":
         db_session = DBSession()
-        catalogs_all = db_session.query(Catalog, User).join(User.catalogs)
+        catalogs_all = db_session.query(Catalog, User).join(Catalog.user)
         db_session.close()
         return render_template('catalogs/catalogs.html', tuple=catalogs_all)
     elif request.method == "POST":
@@ -123,11 +124,13 @@ def show_catalog(catalog_id):
     :return: the appropriate template.
     """
     db_session = DBSession()
-    items_catalog = db_session.query(Item, Catalog, User).filter_by(
-        catalog_id=catalog_id).all()
+    catalog = db_session.query(Catalog).filter_by(id=catalog_id).one()
+    catalogs_all = db_session.query(Catalog, Item, User).join(
+        Catalog.user).join(Catalog.items).filter(Item.catalog_id == catalog_id)
+    print(catalogs_all.count())
     db_session.close()
-    return render_template('catalogs/show.html', items=items_catalog,
-                           catalog_id=catalog_id)
+    return render_template('catalogs/show.html', tuple=catalogs_all,
+                           catalog=catalog)
 
 
 # =========Items=============
@@ -138,12 +141,12 @@ def items():
     POST: Creates a new item.
     :return: GET: the appropriate template, POST: redirect to items
     """
-    print('idinfo' in session)
     if request.method == "GET":
         db_session = DBSession()
-        items_all = db_session.query(Item, Catalog, User).join(Catalog, User)
+        items_all = db_session.query(Catalog, Item, User).join(
+            Item.catalog).join(Item.user)
         db_session.close()
-        return render_template('items/items.html', items=items_all)
+        return render_template('items/items.html', tuple=items_all)
     elif request.method == "POST":
         db_session = DBSession()
         name = request.form['name']
@@ -165,6 +168,10 @@ def new_item():
     Shows the form for creating a new item
     :return: the appropriate template.
     """
+    if not is_signed_in():
+        flash(Markup(MUST_SIGNED_IN))
+        return redirect(request.referrer)
+    
     db_session = DBSession()
     catalogs_all = db_session.query(Catalog).all()
     db_session.close()
@@ -179,10 +186,11 @@ def show_item(item_id):
     :return: the appropriate template.
     """
     db_session = DBSession()
-    item, user = db_session.query(Item, User).join(User).filter_by(
-        id=item_id).one()
+    tuple = db_session.query(Catalog, Item, User).join(Item.catalog).join(
+        Item.user).filter(Item.id == item_id).one()
     db_session.close()
-    return render_template('items/show.html', item=item, user=user)
+    return render_template('items/show.html', catalog=tuple[0], item=tuple[1],
+                           user=tuple[2])
 
 
 # =========Login=============
@@ -218,7 +226,7 @@ def login():
                 raise ValueError('Wrong issuer.')
         except ValueError:
             print("Raised error")
-            session['idinfo'] = None
+            session.pop('idinfo')
             return json.dumps({'success': False}), 401, {
                 'ContentType': 'application/json'}
         create_user()
