@@ -22,11 +22,6 @@
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
 	<link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}"/>
 
-	<!--====== Javascripts & Jquery ======-->
-		<script src="{{ url_for('static', filename='js/jquery-3.2.1.min.js') }}"></script>
-		<script src="{{ url_for('static', filename='js/owl.carousel.min.js') }}"></script>
-		<script src="{{ url_for('static', filename='js/main.js') }}"></script>
-
 	<!-- Google SignIn -->
 		<script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
 
@@ -41,11 +36,4 @@
 	<div id="preloder">
 		<div class="loader"></div>
 	</div>
-	<script type="text/javascript">
-		function onLoad() {
-      gapi.load('auth2', function() {
-        gapi.auth2.init();
-      });
-    }
-	</script>
 	{%include 'header.html'%}

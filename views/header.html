@@ -8,10 +8,10 @@
 			</div>
 			<div class="user-panel">
 				{%if session['idinfo']%}
-					<span>{{session['idinfo'].email}}</span>
-					<div id="signout"><a href="#" onclick="signOut();">Sign out</a></div>
+				<span>{{session['idinfo'].email}}</span>
+				<div id="signout"><a href="#" onclick="signOut();">Sign out</a></div>
 				{%else%}
-					<div id="signin"><a href="{{url_for('login')}}">Sign In / Register</a></div>
+				<div id="signin"><a href="{{url_for('login')}}">Sign In / Register</a></div>
 				{%endif%}
 			</div>
 		</div>
@@ -33,40 +33,43 @@
 	</div>
 </header>
 <!-- Header section end -->
-
 <!-- Flash messages begin -->
 {%with flash_messages = get_flashed_messages()%}
 {%if flash_messages%}
-	<ul>
-		{%for flash_message in flash_messages%}
-			<li>
-				<div class="alert alert-success" role="alert">
-          <button class="close" data-dismiss="alert"></button>
-          <strong>Notice: </strong>{{flash_message}}
-        </div>
-      </li>
-		{%endfor%}
-	</ul>
+<ul>
+	{%for flash_message in flash_messages%}
+	<li>
+		<div class="alert alert-success" role="alert">
+			<button class="close" data-dismiss="alert"></button>
+			<strong>Notice: </strong>{{flash_message}}
+		</div>
+	</li>
+	{%endfor%}
+</ul>
 {%endif%}
 {%endwith%}
 <!-- Flash messages end -->
-
 <script type="text/javascript">
 	function signOut(){
-		var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signOut().then(function () {
-      console.log('User signed out.');
-    });
-		$.ajax({
-            url: '/login',
-            type: 'DELETE',
-            dataType: 'JSON',
-            success: function (data) {
-                window.open("/", target="_self");
-            },
-            failure: function (data) {
-                alert("Something went wrong" + data);
-            }
-        });
+		gapi.load('auth2', function() {
+			gapi.auth2.init().then(function () {
+				var auth2 = gapi.auth2.getAuthInstance();
+				auth2.signOut().then(function () {
+					console.log('User signed out.');
+				});
+				$.ajax({
+					url: '/login',
+					type: 'DELETE',
+					dataType: 'JSON',
+					success: function (data) {
+						window.open("/", target="_self");
+					},
+					failure: function (data) {
+						alert("Something went wrong" + data);
+					}
+				});
+			});
+		});
+		
 	}
 </script>
