@@ -24,7 +24,7 @@
 	  $('#signout').removeClass('no-display')
 	  var id_token = googleUser.getAuthResponse().id_token;
 	  $.ajax({
-            url: '/login',
+            url: '{{url_for("login")}}',
             type: 'POST',
             data: {
                 token: id_token,

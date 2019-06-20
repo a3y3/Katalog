@@ -58,7 +58,7 @@
 					console.log('User signed out.');
 				});
 				$.ajax({
-					url: '/login',
+					url: '{{url_for('login')}}',
 					type: 'DELETE',
 					dataType: 'JSON',
 					success: function (data) {
