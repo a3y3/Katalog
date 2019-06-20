@@ -5,21 +5,7 @@
 		<h3>
 		Create new catalog
 		</h3>
-		<div class="row">
-			<div class="col-12">
-				<div class="sp-blog-item">
-					<div class="blog-text">
-						<form action="{{url_for('catalogs')}}" method="POST">
-							<div class="form-group">
-								<label for="name">Name</label>
-								<input type="name" class="form-control" id="name" aria-describedby="catalogName" placeholder="Enter name of the catalog" name="name">
-							</div>
-							<button type="submit" class="btn btn-primary">Submit</button>
-						</form>
-					</div>
-				</div>
-			</div>
-		</div>
+		{%include 'catalogs/actions_catalogs.html'%}
 	</div>
 </section>
 <!-- Footer widgets section end -->

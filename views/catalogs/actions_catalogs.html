@@ -1,0 +1,18 @@
+<!-- IMPORTANT: Read before modifying -->
+<!-- This is a GENERIC catalogs form that currently is supposed to DRY-up new and edit actions. Hence, it uses multiple if else conditions. There's some jQuery that depends on the results of these conditions too. Hence, if you want to modify or add attributes, make sure the if else conditions do not break. An explanation of the conditions is given below:-->
+<!-- for new, the variable catalog is not supplied. For edit, it is. Hence, we can build conditions around the existence of this variable.  -->
+<div class="row">
+	<div class="col-12">
+		<div class="sp-blog-item">
+			<div class="blog-text">
+				<form action="{{url_for('catalogs')}}" method="POST">
+					<div class="form-group">
+						<label for="name">Name</label>
+						<input type="name" id="name" class="form-control" aria-describedby="catalogName" placeholder="Enter name of the catalog" name="name" autocomplete="off" {%if catalog%}value="{{catalog.name}}"{%endif%}>
+					</div>
+					<button type="submit" class="btn btn-primary" {%if catalog%} id="btn-submit-edit" {%endif%} >Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

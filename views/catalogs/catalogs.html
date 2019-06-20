@@ -11,8 +11,8 @@
 					<div class="sp-blog-item">
 						<div class="blog-text">
 							<h5>{{catalog.name}}</h5>
-							<span>By: {{catalog.user.email}}</span>
-							<a href="{{url_for('show_catalog', catalog_id=catalog.id)}}" class="readmore"><i class="fa fa-angle-right"></i></a>
+							<span>By: {{user.email}}</span>
+							<a href="{{url_for('id_catalog', catalog_id=catalog.id)}}" class="readmore"><i class="fa fa-angle-right"></i></a>
 						</div>
 					</div>
 				</div>

@@ -24,9 +24,10 @@ MUST_SIGNED_IN = "You need to <a href=/login>sign in </a> " \
 
 
 # =========CSRF=============
-def create_state():
+def get_csrf_token():
     """
     Creates a CSRF token as a mixture of upper and lowercase symbols.
+
     :return: the generated token
     """
     state = ''.join(
@@ -39,6 +40,7 @@ def create_state():
 def valid_state():
     """
     Checks if the received CSRF token matches the one in session.
+
     :return: True if the state is valid, False if there's a CSRF token mismatch.
     """
     received_state = request.form['state']
@@ -53,6 +55,7 @@ def create_user():
     """
     Creates a new User if one doesn't exist yet. Lookup is performed against
     User.email, an indexed column.
+
     :return: None
     """
     email = session['idinfo']['email']
@@ -70,6 +73,7 @@ def create_user():
 def index():
     """
     Displays the index page, which lists some items on the home screen.
+
     :return: the appropriate template.
     """
     db_sesssion = DBSession()
@@ -83,8 +87,10 @@ def index():
 @app.route('/catalogs/', methods=["GET", "POST"])
 def catalogs():
     """
-    GET: Shows all the catalogs available
-    POST: Creates a new catalog
+    GET: Shows all the catalogs available.
+
+    POST: Creates a new catalog.
+
     :return: template (if GET) and a redirect to catalogs on POST.
     """
     if request.method == "GET":
@@ -107,7 +113,8 @@ def catalogs():
 @app.route('/catalogs/new/')
 def new_catalog():
     """
-    Shows the form for creating a new catalog
+    Shows the form for creating a new catalog.
+
     :return: the appropriate template.
     """
     if not is_signed_in():
@@ -116,25 +123,72 @@ def new_catalog():
     return render_template('catalogs/new.html')
 
 
-@app.route('/catalogs/<int:catalog_id>')
-def show_catalog(catalog_id):
+@app.route('/catalogs/<int:catalog_id>/', methods=['GET', 'PUT', 'DELETE'])
+def id_catalog(catalog_id):
     """
-    Shows the items in a given catalog.
-    :param catalog_id: the id of the catalog to be displayed.
+    GET: Shows the items in a given catalog.
+
+    PUT: Updates the particular catalog with the values supplied. The operation
+    is guaranteed to be idempotent.
+
+    DELETE: Deletes the particular catalog.
+
+    :param catalog_id: the id of the catalog.
+
     :return: the appropriate template.
     """
     db_session = DBSession()
     catalog = db_session.query(Catalog).filter_by(id=catalog_id).one()
-    catalogs_all = db_session.query(Catalog, Item, User).join(
-        Catalog.user).join(Catalog.items).filter(Item.catalog_id == catalog_id)
-    print(catalogs_all.count())
+    if request.method == "GET":
+        catalogs_all = db_session.query(Catalog, Item, User).join(
+            Catalog.user).join(Catalog.items).filter(
+            Item.catalog_id == catalog_id)
+        db_session.close()
+        return render_template('catalogs/show.html', tuple=catalogs_all,
+                               catalog=catalog)
+    elif request.method == "PUT":
+        if not valid_state():
+            return json.dumps({'success': False}), 401, {
+                'ContentType': 'application/json'}
+
+        new_name = request.form['name']
+        catalog.name = new_name
+        db_session.add(catalog)
+        db_session.commit()
+        db_session.close()
+        return json.dumps({'success': True}), 200, {
+            'ContentType': 'application/json'}
+    elif request.method == "DELETE":
+        if not valid_state():
+            return json.dumps({'success': False}), 401, {
+                'ContentType': 'application/json'}
+        db_session.delete(catalog)
+        db_session.commit()
+        db_session.close()
+        return json.dumps({'success': True}), 200, {
+            'ContentType': 'application/json'}
+
+
+@app.route('/catalogs/<int:catalog_id>/edit/')
+def edit_catalog(catalog_id):
+    """
+    Displays a page that contains a form for editing a particular catalog.
+
+    :param catalog_id: The ID of the catalog for which the edit page has to be
+    displayed.
+
+    :return: the appropriate template.
+    """
+    db_session = DBSession()
+    catalog = db_session.query(Catalog).filter_by(id=catalog_id).one()
+    state = get_csrf_token()
+    session['state'] = state
     db_session.close()
-    return render_template('catalogs/show.html', tuple=catalogs_all,
-                           catalog=catalog)
+    return render_template('catalogs/edit.html', catalog=catalog, state=state)
 
 
 # =========Items=============
-@app.route('/items', methods=['GET', 'POST'])
+@app.route('/items/', methods=['GET', 'POST'])
 def items():
     """
     GET: Shows all items
@@ -171,14 +225,14 @@ def new_item():
     if not is_signed_in():
         flash(Markup(MUST_SIGNED_IN))
         return redirect(request.referrer)
-    
+
     db_session = DBSession()
     catalogs_all = db_session.query(Catalog).all()
     db_session.close()
     return render_template('items/new.html', catalogs=catalogs_all)
 
 
-@app.route('/items/<int:item_id>')
+@app.route('/items/<int:item_id>/')
 def show_item(item_id):
     """
     Shows a particular item.
@@ -194,7 +248,7 @@ def show_item(item_id):
 
 
 # =========Login=============
-@app.route('/login', methods=["GET", "POST", "DELETE"])
+@app.route('/login/', methods=["GET", "POST", "DELETE"])
 def login():
     """
     Handles all the login cases.
@@ -204,7 +258,7 @@ def login():
     :return: the appropriate template.
     """
     if request.method == "GET":
-        state = create_state()
+        state = get_csrf_token()
         session['state'] = state
         return render_template('login/new.html', state=state)
 
@@ -241,20 +295,6 @@ def login():
 
 def is_signed_in():
     return 'idinfo' in session
-
-
-# =========Test Routes=============
-@app.route('/debug/test')
-def test():
-    email = session['idinfo']['email']
-    db_session = DBSession()
-    user = db_session.query(User).filter_by(email=email).first()
-    catalogs_all = user.catalogs
-    output = ""
-    for c in catalogs_all:
-        output += c.name
-    db_session.close()
-    return output
 
 
 # =========Main=============
