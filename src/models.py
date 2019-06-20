@@ -24,7 +24,8 @@ class Catalog(Base):
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
 
     user = relationship("User", back_populates="catalogs")
-    items = relationship("Item", back_populates="catalog")
+    items = relationship("Item", back_populates="catalog",
+                         cascade="all, delete-orphan")
 
 
 class Item(Base):

@@ -21,6 +21,7 @@ DBSession = sessionmaker(bind=engine)
 # =========Constants=============
 MUST_SIGNED_IN = "You need to <a href=/login>sign in </a> " \
                  "before you perform that action."
+CATALOG_DELETED = "Catalog deleted successfully along with all the items in it."
 
 
 # =========CSRF=============
@@ -143,9 +144,10 @@ def id_catalog(catalog_id):
         catalogs_all = db_session.query(Catalog, Item, User).join(
             Catalog.user).join(Catalog.items).filter(
             Item.catalog_id == catalog_id)
+        state = get_csrf_token()
         db_session.close()
         return render_template('catalogs/show.html', tuple=catalogs_all,
-                               catalog=catalog)
+                               catalog=catalog, state=state)
     elif request.method == "PUT":
         if not valid_state():
             return json.dumps({'success': False}), 401, {
@@ -165,6 +167,7 @@ def id_catalog(catalog_id):
         db_session.delete(catalog)
         db_session.commit()
         db_session.close()
+        flash(CATALOG_DELETED)
         return json.dumps({'success': True}), 200, {
             'ContentType': 'application/json'}
 

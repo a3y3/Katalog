@@ -9,3 +9,25 @@
 	</div>
 </section>
 {%include 'html_end.html'%}
+<script type="text/javascript">
+	$(function () {
+		$("#items-delete").on("click", function(){
+			if (confirm("This action will delete this catalog and ALL the items belonging to this catalog. Are you absolutely sure?")) {
+				$.ajax({
+					url: '{{url_for("id_catalog", catalog_id=catalog.id)}}',
+					type: 'DELETE',
+					dataType: 'JSON',
+					data: {
+		        state: "{{state}}"
+		      },
+					success: function (data) {
+						window.open("{{url_for('catalogs')}}", target="_self");
+					},
+					failure: function (data) {
+						alert("Something went wrong" + data);
+					}
+				});
+			}
+		});
+	});
+</script>
