@@ -182,7 +182,7 @@ def id_catalog(catalog_id):
             'ContentType': 'application/json'}
 
 
-@app.route('/catalogs/<int:catalog_id>/JSON')
+@app.route('/catalogs/<int:catalog_id>/JSON/')
 def id_catalog_json(catalog_id):
     db_session = DBSession()
     items_in_catalog = db_session.query(Item).filter(
@@ -239,6 +239,20 @@ def items():
         return redirect(url_for('items'))
 
 
+@app.route('/items/JSON/')
+def items_json():
+    """
+    JSON endpoint for all the items in the database.
+
+    :return: JSON string containing items' serialized values (@see models.py)
+    """
+    db_session = DBSession()
+    items_all = db_session.query(Item).all()
+    items_serialized = [i.serialize for i in items_all]
+    db_session.close()
+    return jsonify(items=items_serialized)
+
+
 @app.route('/items/new/')
 def new_item():
     """
@@ -259,15 +273,34 @@ def new_item():
 def show_item(item_id):
     """
     Shows a particular item.
+
     :param item_id: the id of the item to be shown.
+
     :return: the appropriate template.
     """
     db_session = DBSession()
-    tuple = db_session.query(Catalog, Item, User).join(Item.catalog).join(
+    item_tuple = db_session.query(Catalog, Item, User).join(Item.catalog).join(
         Item.user).filter(Item.id == item_id).one()
     db_session.close()
-    return render_template('items/show.html', catalog=tuple[0], item=tuple[1],
-                           user=tuple[2])
+    return render_template('items/show.html', catalog=item_tuple[0],
+                           item=item_tuple[1],
+                           user=item_tuple[2])
+
+
+@app.route('/items/<int:item_id>/JSON/')
+def show_item_json(item_id):
+    """
+    JSON endpoint for a particular item.
+
+    :param item_id: The ID of the particular item.
+
+    :return: JSON string containing item's serialized value (@see models.py)
+    """
+    db_session = DBSession()
+    item = db_session.query(Item).filter(Item.id == item_id).one()
+    item_serialized = [item.serialize]
+    db_session.close()
+    return jsonify(item=item_serialized)
 
 
 # =========Login=============
