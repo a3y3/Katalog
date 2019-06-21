@@ -15,6 +15,12 @@ class User(Base):
     catalogs = relationship("Catalog", back_populates="user")
     items = relationship("Item", back_populates="user")
 
+    @property
+    def serialize(self):
+        return {
+            'email': self.email
+        }
+
 
 class Catalog(Base):
     __tablename__ = 'catalogs'
@@ -26,6 +32,13 @@ class Catalog(Base):
     user = relationship("User", back_populates="catalogs")
     items = relationship("Item", back_populates="catalog",
                          cascade="all, delete-orphan")
+
+    @property
+    def serialize(self):
+        return {
+            'name': self.name,
+            'by': self.user.email
+        }
 
 
 class Item(Base):
@@ -39,6 +52,14 @@ class Item(Base):
 
     user = relationship(User, back_populates="items")
     catalog = relationship(Catalog, back_populates="items")
+
+    @property
+    def serialize(self):
+        return {
+            'name': self.name,
+            'catalog': self.catalog.name,
+            'by': self.user.email
+        }
 
 
 engine = create_engine('postgres:///catalog')

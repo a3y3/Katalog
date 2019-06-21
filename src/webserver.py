@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, \
-    session, flash, Markup
+    session, flash, Markup, jsonify
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -99,6 +99,7 @@ def catalogs():
         catalogs_all = db_session.query(Catalog, User).join(Catalog.user)
         db_session.close()
         return render_template('catalogs/catalogs.html', tuple=catalogs_all)
+
     elif request.method == "POST":
         db_session = DBSession()
         name = request.form['name']
@@ -109,6 +110,15 @@ def catalogs():
         db_session.commit()
         db_session.close()
         return redirect(url_for('catalogs'))
+
+
+@app.route('/catalogs/JSON/')
+def catalogs_json():
+    db_session = DBSession()
+    catalogs_all = db_session.query(Catalog).all()
+    catalogs_serialized = [i.serialize for i in catalogs_all]
+    db_session.close()
+    return jsonify(catalogs=catalogs_serialized)
 
 
 @app.route('/catalogs/new/')
@@ -170,6 +180,16 @@ def id_catalog(catalog_id):
         flash(CATALOG_DELETED)
         return json.dumps({'success': True}), 200, {
             'ContentType': 'application/json'}
+
+
+@app.route('/catalogs/<int:catalog_id>/JSON')
+def id_catalog_json(catalog_id):
+    db_session = DBSession()
+    items_in_catalog = db_session.query(Item).filter(
+        Item.catalog_id == catalog_id)
+    items_serialized = [i.serialize for i in items_in_catalog]
+    db_session.close()
+    return jsonify(items=items_serialized)
 
 
 @app.route('/catalogs/<int:catalog_id>/edit/')
