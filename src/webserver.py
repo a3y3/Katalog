@@ -18,7 +18,7 @@ engine = create_engine('postgres:///catalog')
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
-# =========Constants=============
+# =========Globals=============
 MUST_SIGN_IN = "You need to <a href=/login>sign in </a> " \
                "before you perform that action."
 CATALOG_DELETED = "Catalog deleted successfully along with all the items in it."
@@ -26,52 +26,6 @@ ITEM_DELETED = "Item deleted successfully."
 NOT_AUTHORIZED = "You do not have permission to view that resource(s). This " \
                  "could be because you are trying view a resource that you do" \
                  " not own."
-
-
-# =========CSRF=============
-def get_csrf_token():
-    """
-    Creates a CSRF token as a mixture of upper and lowercase symbols.
-
-    :return: the generated token
-    """
-    state = ''.join(
-        random.choice(string.ascii_uppercase + string.ascii_lowercase)
-        for _ in range(32))
-    session['state'] = state
-    return state
-
-
-def valid_state():
-    """
-    Checks if the received CSRF token matches the one in session.
-
-    :return: True if the state is valid, False if there's a CSRF token mismatch.
-    """
-    received_state = request.form['state']
-    if received_state != session['state']:
-        print("CSRF mismatch", received_state, "!=", session['state'])
-        return False
-    return True
-
-
-# =========Users=============
-def create_user():
-    """
-    Creates a new User if one doesn't exist yet. Lookup is performed against
-    User.email, an indexed column.
-
-    :return: None
-    """
-    email = session['idinfo']['email']
-    db_session = DBSession()
-    user = db_session.query(User).filter_by(email=email).first()
-    if user is None:
-        user = User(email=email)
-        db_session.add(user)
-        db_session.commit()
-    db_session.close()
-
 
 # =========Index=============
 @app.route('/')
@@ -81,10 +35,10 @@ def index():
 
     :return: the appropriate template.
     """
-    db_sesssion = DBSession()
-    items_three = db_sesssion.query(Catalog, Item, User).join(
+    db_session = DBSession()
+    items_three = db_session.query(Catalog, Item, User).join(
         Item.catalog).join(Item.user).limit(3)
-    db_sesssion.close()
+    db_session.close()
     return render_template('index.html', tuple=items_three)
 
 
@@ -162,10 +116,19 @@ def id_catalog(catalog_id):
         catalogs_all = db_session.query(Catalog, Item, User).join(
             Item.user).join(Item.catalog).filter(
             Item.catalog_id == catalog_id)
+
+        if is_signed_in():
+            email = session['idinfo']['email']
+            user = db_session.query(User).filter_by(email=email).one()
+            display_actions = (catalog.user_id == user.id)
+        else:
+            display_actions = False
+
         state = get_csrf_token()
         db_session.close()
         return render_template('catalogs/show.html', tuple=catalogs_all,
-                               catalog=catalog, state=state)
+                               catalog=catalog, display_actions=display_actions,
+                               state=state)
 
     elif request.method == "PUT":
         if not valid_state():
@@ -174,7 +137,8 @@ def id_catalog(catalog_id):
 
         if not is_authorized_catalog(catalog_id):
             flash(NOT_AUTHORIZED)
-            return redirect(request.referrer)
+            return json.dumps({'success': False}), 403, {
+                'ContentType': 'application/json'}
 
         new_name = request.form['name']
         catalog.name = new_name
@@ -191,7 +155,8 @@ def id_catalog(catalog_id):
 
         if not is_authorized_catalog(catalog_id):
             flash(NOT_AUTHORIZED)
-            return redirect(request.referrer)
+            return json.dumps({'success': False}), 403, {
+                'ContentType': 'application/json'}
 
         db_session.delete(catalog)
         db_session.commit()
@@ -223,11 +188,11 @@ def edit_catalog(catalog_id):
     """
     if not is_signed_in():
         flash(Markup(MUST_SIGN_IN))
-        return redirect(request.referrer)
+        return redirect(url_for("id_catalog", catalog_id=catalog_id))
 
     if not is_authorized_catalog(catalog_id):
         flash(NOT_AUTHORIZED)
-        return redirect(request.referrer)
+        return redirect(url_for("id_catalog", catalog_id=catalog_id))
 
     db_session = DBSession()
     catalog = db_session.query(Catalog).filter_by(id=catalog_id).one()
@@ -321,10 +286,19 @@ def id_item(item_id):
     if request.method == "GET":
         item_tuple = db_session.query(Catalog, Item, User).join(Item.catalog) \
             .join(Item.user).filter(Item.id == item_id).one()
+
+        if is_signed_in():
+            email = session['idinfo']['email']
+            user = db_session.query(User).filter_by(email=email).one()
+            display_actions = (item.user_id == user.id)
+        else:
+            display_actions = False
         db_session.close()
+
         return render_template('items/show.html', catalog=item_tuple[0],
                                item=item_tuple[1],
-                               user=item_tuple[2])
+                               user=item_tuple[2],
+                               display_actions=display_actions)
 
     elif request.method == "PUT":
         if not valid_state():
@@ -333,7 +307,8 @@ def id_item(item_id):
 
         if not is_authorized_item(item_id):
             flash(NOT_AUTHORIZED)
-            return redirect(request.referrer)
+            return json.dumps({'success': False}), 403, {
+                'ContentType': 'application/json'}
 
         new_name = request.form['name']
         new_desc = request.form['description']
@@ -354,7 +329,8 @@ def id_item(item_id):
 
         if not is_authorized_item(item_id):
             flash(NOT_AUTHORIZED)
-            return redirect(request.referrer)
+            return json.dumps({'success': False}), 403, {
+                'ContentType': 'application/json'}
 
         db_session.delete(item)
         db_session.commit()
@@ -392,11 +368,11 @@ def edit_item(item_id):
     """
     if not is_signed_in():
         flash(Markup(MUST_SIGN_IN))
-        return redirect(request.referrer)
+        return redirect(url_for("id_item", item_id=item_id))
 
     if not is_authorized_item(item_id):
         flash(NOT_AUTHORIZED)
-        return redirect(request.referrer)
+        return redirect(url_for("id_item", item_id=item_id))
 
     db_session = DBSession()
     item = db_session.query(Item).filter_by(id=item_id).one()
@@ -466,6 +442,7 @@ def is_signed_in():
     return 'idinfo' in session
 
 
+# =========Authorizations=============
 def is_authorized_catalog(catalog_id):
     """
     Checks if the current user is authorized to use privileged actions on a
@@ -504,6 +481,53 @@ def is_authorized_item(item_id):
     user_items = user.items
     db_session.close()
     return item in user_items
+
+
+# =========CSRF=============
+def get_csrf_token():
+    """
+    Creates a CSRF token as a mixture of upper and lowercase symbols.
+
+    :return: the generated token
+    """
+    state = ''.join(
+        random.choice(string.ascii_uppercase + string.ascii_lowercase)
+        for _ in range(32))
+    session['state'] = state
+    return state
+
+
+def valid_state():
+    """
+    Checks if the received CSRF token matches the one in session.
+
+    :return: True if the state is valid, False if there's a CSRF token mismatch.
+    """
+    received_state = request.form['state']
+    if received_state != session['state']:
+        print("CSRF mismatch", received_state, "!=", session['state'])
+        return False
+    return True
+
+
+# =========Users=============
+def create_user():
+    """
+    Creates a new User if one doesn't exist yet. Lookup is performed against
+    User.email, an indexed column.
+
+    :return: None
+    """
+    email = session['idinfo']['email']
+    db_session = DBSession()
+    user = db_session.query(User).filter_by(email=email).first()
+
+    if user is None:
+        user = User(email=email)
+        db_session.add(user)
+        db_session.commit()
+
+    db_session.close()
 
 
 # =========Main=============
