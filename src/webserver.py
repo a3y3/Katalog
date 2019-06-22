@@ -160,7 +160,7 @@ def id_catalog(catalog_id):
 
     if request.method == "GET":
         catalogs_all = db_session.query(Catalog, Item, User).join(
-            Catalog.user).join(Catalog.items).filter(
+            Item.user).join(Item.catalog).filter(
             Item.catalog_id == catalog_id)
         state = get_csrf_token()
         db_session.close()
