@@ -23,7 +23,9 @@
 						<h5>{{item.name}}</h5>
 						<span><a href="{{url_for('id_catalog', catalog_id=catalog.id)}}">{{catalog.name}}</a></span>
 						<span>By {{user.email}}</span>
-						<p>{{item.description}}</p>
+						{% for para in description %}
+							<p>{{para}}</p>
+						{% endfor %}
 					</div>
 				</div>
 			</div>

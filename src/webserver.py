@@ -296,12 +296,14 @@ def id_item(item_id):
         db_session.close()
 
         state = get_csrf_token()
+        description = item.description.split("\n")
 
         return render_template('items/show.html', catalog=item_tuple[0],
                                item=item_tuple[1],
                                user=item_tuple[2],
                                display_actions=display_actions,
-                               state=state)
+                               state=state,
+                               description=description)
 
     elif request.method == "PUT":
         if not valid_state():
