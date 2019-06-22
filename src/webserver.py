@@ -295,10 +295,13 @@ def id_item(item_id):
             display_actions = False
         db_session.close()
 
+        state = get_csrf_token()
+
         return render_template('items/show.html', catalog=item_tuple[0],
                                item=item_tuple[1],
                                user=item_tuple[2],
-                               display_actions=display_actions)
+                               display_actions=display_actions,
+                               state=state)
 
     elif request.method == "PUT":
         if not valid_state():

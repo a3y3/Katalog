@@ -31,3 +31,25 @@
 	</div>
 </section>
 {%include 'html_end.html'%}
+<script type="text/javascript">
+	$(function () {
+		$("#item-delete").on("click", function(){
+			if (confirm("This action will permanantly delete this item. Are you absolutely sure?")) {
+				$.ajax({
+					url: '{{url_for("id_item", item_id=item.id)}}',
+					type: 'DELETE',
+					dataType: 'JSON',
+					data: {
+		        state: "{{state}}"
+		      },
+					success: function (data) {
+						window.open("{{url_for('items')}}", target="_self");
+					},
+					failure: function (data) {
+						alert("Something went wrong" + data);
+					}
+				});
+			}
+		});
+	});
+</script>
