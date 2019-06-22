@@ -13,7 +13,7 @@
 				<span><a href="{{url_for('id_catalog', catalog_id=catalog.id)}}">{{catalog.name}}</a></span>
 				<span>By {{user.email}}</span>
 				<p class="items-ellipsis">{{item.description}}</p>
-				<a href="{{url_for('show_item', item_id=item.id)}}" class="readmore" title="Click to go to item"><i class="fa fa-angle-right"></i></a>
+				<a href="{{url_for('id_item', item_id=item.id)}}" class="readmore" title="Click to go to item"><i class="fa fa-angle-right"></i></a>
 			</div>
 		</div>
 	</div>

@@ -1,0 +1,36 @@
+<!-- IMPORTANT: Read before modifying -->
+<!-- This is a GENERIC items form that currently is supposed to DRY-up new and edit actions. Hence, it uses multiple if else conditions. There's some jQuery that depends on the results of these conditions too. Hence, if you want to modify or add attributes, make sure the if else conditions do not break. An explanation of the conditions is given below:-->
+<!-- for new, the variable item is not supplied. For edit, it is. Hence, we can build conditions around the existence of this variable.  -->
+<div class="row">
+	<div class="col-12">
+		<div class="sp-blog-item">
+			<div class="blog-text">
+				<form action="{{url_for('items')}}" method="POST">
+					<div class="form-group">
+						<div class="form-group">
+							<label for="name">Name</label>
+							<input type="name" class="form-control" id="name" placeholder="Enter name of the item" name="name" autofocus="true" autocomplete="off" {%if item%}value="{{item.name}}"{%endif%}>
+						</div>
+						<div class="form-group">
+							<label for="desc">Description</label>
+							<textarea class="form-control" id="desc" placeholder="Enter description of the item" name="description"
+							>{%if item%}{{item.description}}{%endif%}</textarea>
+						</div>
+						<div class="form-group">
+							<label for="catalog_id">Catalog</label>
+							<select class="form-control" id="select-catalog" name="catalog_id" aria-describedby="selectCatalogHelp">
+								{%for catalog in catalogs%}
+									<option value="{{catalog.id}}" {%if item%} {%if item.catalog_id == catalog.id%} selected="selected"{%endif%} {%endif%}>
+									{{catalog.name}}
+								  </option>
+								{%endfor%}
+							</select>
+							<small id="selectCatalogHelp" class="form-text text-muted">The catalog to which this item belongs to.</small>
+						</div>
+					</div>
+					<button type="submit" class="btn btn-primary" {%if item%} id="btn-submit-edit" {%endif%} >Submit</button>
+				</form>
+			</div>
+		</div>
+	</div>
+</div>

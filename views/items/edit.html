@@ -1,0 +1,37 @@
+{%include 'html_start.html'%}
+<section class="bottom-widgets-section spad">
+	<div class="container">
+		<h3>
+		Edit item
+		</h3>
+		{%include 'items/actions_items.html'%}
+	</div>
+</section>
+{%include 'html_end.html'%}
+<script type="text/javascript">
+	$(function (argument) {
+		$("#btn-submit-edit").on("click", function(e){
+			name = $("#name").val();
+			description = $("#desc").val();
+			catalog_id = $("#select-catalog").val();
+			$.ajax({
+					url: '{{url_for("id_item", item_id=item.id)}}',
+					type: 'PUT',
+					dataType: 'JSON',
+					data: {
+              name: name,
+              description: description,
+              catalog_id: catalog_id,
+              state: "{{state}}"
+          },
+					success: function (data) {
+						window.open("{{url_for('id_item', item_id=item.id)}}", target="_self");
+					},
+					failure: function (data) {
+						alert("Something went wrong" + data);
+					}
+				});
+			return false;
+		});
+	});
+</script>
