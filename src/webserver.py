@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from flask import Flask, render_template, request, redirect, url_for, \
     session, flash, Markup, jsonify
 from sqlalchemy import create_engine
@@ -10,22 +11,29 @@ from google.auth.transport import requests
 import random
 import string
 import json
+import os
 
 app = Flask(__name__, template_folder='../views',
             static_folder='../views/static')
 
-engine = create_engine('postgres:///catalog')
+if os.getenv("DATABASE_URL"):
+    DATABASE_URL = os.environ['DATABASE_URL']
+else:
+    DATABASE_URL = 'postgres:///catalog'
+
+engine = create_engine(DATABASE_URL)
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
 # =========Globals=============
 MUST_SIGN_IN = "You need to <a href=/login>sign in </a> " \
                "before you perform that action."
-CATALOG_DELETED = "Catalog deleted successfully along with all the items in it."
+CATALOG_DELETED = "Catalog deleted successfully, along with all the items in" \
+                  " it."
 ITEM_DELETED = "Item deleted successfully."
 NOT_AUTHORIZED = "You do not have permission to view that resource(s). This " \
-                 "could be because you are trying view a resource that you do" \
-                 " not own."
+                 "could be because you are trying view a resource that you" \
+                 " do not own."
 
 # =========Index=============
 @app.route('/')
@@ -127,7 +135,8 @@ def id_catalog(catalog_id):
         state = get_csrf_token()
         db_session.close()
         return render_template('catalogs/show.html', tuple=catalogs_all,
-                               catalog=catalog, display_actions=display_actions,
+                               catalog=catalog,
+                               display_actions=display_actions,
                                state=state)
 
     elif request.method == "PUT":
@@ -506,7 +515,8 @@ def valid_state():
     """
     Checks if the received CSRF token matches the one in session.
 
-    :return: True if the state is valid, False if there's a CSRF token mismatch.
+    :return: True if the state is valid, False if there's a CSRF token
+    mismatch.
     """
     received_state = request.form['state']
     if received_state != session['state']:
@@ -535,11 +545,8 @@ def create_user():
     db_session.close()
 
 
-# =========Main=============
-if __name__ == '__main__':
-    app.debug = True
-    secret_key = \
-        json.loads(open('../secrets/app_secrets.json', 'r').read())['app'][
-            'secret']
-    app.secret_key = secret_key
-    app.run(host='0.0.0.0', port=5000)
+
+secret_key = \
+    json.loads(open('../secrets/app_secrets.json', 'r').read())['app'][
+        'secret']
+app.secret_key = secret_key

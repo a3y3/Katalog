@@ -3,7 +3,13 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine
 
+import os
+
 Base = declarative_base()
+if os.getenv("DATABASE_URL"):
+    DATABASE_URL = os.environ['DATABASE_URL']
+else:
+    DATABASE_URL = 'postgres:///catalog'
 
 
 class User(Base):
@@ -63,5 +69,5 @@ class Item(Base):
         }
 
 
-engine = create_engine('postgres:///catalog')
+engine = create_engine(DATABASE_URL)
 Base.metadata.create_all(engine)
