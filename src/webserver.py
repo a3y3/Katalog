@@ -35,6 +35,7 @@ NOT_AUTHORIZED = "You do not have permission to view that resource(s). This " \
                  "could be because you are trying view a resource that you" \
                  " do not own."
 
+
 # =========Index=============
 @app.route('/')
 def index():
@@ -545,8 +546,11 @@ def create_user():
     db_session.close()
 
 
-
 secret_key = \
     json.loads(open('../secrets/app_secrets.json', 'r').read())['app'][
         'secret']
 app.secret_key = secret_key
+
+if __name__ == '__main__':
+    app.debug = True
+    app.run(host='0.0.0.0', port=5000)
