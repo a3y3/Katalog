@@ -5,6 +5,7 @@
 		<h3>
 			Catalogs | <a href="{{url_for('new_catalog')}}">Create new</a>
 		</h3>
+		<h6>Count: {{count}}</h6>
 		<div class="row">
 			{%for catalog, user in tuple%}
 				<div class="col-lg-4">

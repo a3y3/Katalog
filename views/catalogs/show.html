@@ -4,7 +4,8 @@
 		<h3>
 		Catalog: {{catalog.name}}
 		</h3>
-		
+		<h6>{{count}} items in catalog</h6>
+
 		{% if display_actions %}
 			<h5>Actions: <a href="{{url_for('edit_catalog', catalog_id=catalog.id)}}" id="items-edit">Edit</a> | <a href="#" id="items-delete">Delete</a></h5>
 		{% endif %}

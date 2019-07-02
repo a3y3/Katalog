@@ -64,8 +64,10 @@ def catalogs():
     if request.method == "GET":
         db_session = DBSession()
         catalogs_all = db_session.query(Catalog, User).join(Catalog.user)
+        catalogs_count = catalogs_all.count()
         db_session.close()
-        return render_template('catalogs/catalogs.html', tuple=catalogs_all)
+        return render_template('catalogs/catalogs.html', tuple=catalogs_all,
+                               count=catalogs_count)
 
     elif request.method == "POST":
         if not is_signed_in():
@@ -125,6 +127,7 @@ def id_catalog(catalog_id):
         catalogs_all = db_session.query(Catalog, Item, User).join(
             Item.user).join(Item.catalog).filter(
             Item.catalog_id == catalog_id)
+        catalogs_count = catalogs_all.count()
 
         if is_signed_in():
             email = session['idinfo']['email']
@@ -138,7 +141,8 @@ def id_catalog(catalog_id):
         return render_template('catalogs/show.html', tuple=catalogs_all,
                                catalog=catalog,
                                display_actions=display_actions,
-                               state=state)
+                               state=state,
+                               count=catalogs_count)
 
     elif request.method == "PUT":
         if not valid_state():
@@ -224,8 +228,10 @@ def items():
         db_session = DBSession()
         items_all = db_session.query(Catalog, Item, User).join(
             Item.catalog).join(Item.user)
+        items_count = items_all.count()
         db_session.close()
-        return render_template('items/items.html', tuple=items_all)
+        return render_template('items/items.html', tuple=items_all,
+                               count=items_count)
 
     elif request.method == "POST":
         if not is_signed_in():
