@@ -25,7 +25,7 @@ engine = create_engine(DATABASE_URL)
 Base.metadata.bind = engine
 DBSession = sessionmaker(bind=engine)
 
-# =========Globals=============
+# =========Constants=============
 MUST_SIGN_IN = "You need to <a href=/login>sign in </a> " \
                "before you perform that action."
 CATALOG_DELETED = "Catalog deleted successfully, along with all the items in" \
@@ -34,6 +34,7 @@ ITEM_DELETED = "Item deleted successfully."
 NOT_AUTHORIZED = "You do not have permission to view that resource(s). This " \
                  "could be because you are trying view a resource that you" \
                  " do not own."
+EMPTY_FORM = "No input read. Please enter some value."
 
 
 # =========Index=============
@@ -75,6 +76,10 @@ def catalogs():
             return redirect(request.referrer)
         db_session = DBSession()
         name = request.form['name']
+        name = name.strip()
+        if not name:
+            flash(EMPTY_FORM)
+            return redirect(request.referrer)
         email = session['idinfo']['email']
         user = db_session.query(User).filter_by(email=email).first()
         catalog = Catalog(name=name, user_id=user.id)
@@ -240,7 +245,13 @@ def items():
 
         db_session = DBSession()
         name = request.form['name']
+        name = name.strip()
         description = request.form['description']
+        description = description.strip()
+        if not name or not description:
+            flash(EMPTY_FORM)
+            redirect(request.referrer)
+
         catalog_id = request.form['catalog_id']
         email = session['idinfo']['email']
         user = db_session.query(User).filter_by(email=email).first()

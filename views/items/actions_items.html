@@ -9,12 +9,12 @@
 					<div class="form-group">
 						<div class="form-group">
 							<label for="name">Name</label>
-							<input type="name" class="form-control" id="name" placeholder="Enter name of the item" name="name" autofocus="true" autocomplete="off" {%if item%}value="{{item.name}}"{%endif%}>
+							<input type="name" class="form-control" id="name" placeholder="Enter name of the item" name="name" autofocus="true" autocomplete="off" {%if item%}value="{{item.name}}"{%endif%} required="required">
 						</div>
 						<div class="form-group">
 							<label for="desc">Description</label>
 							<textarea class="form-control" id="desc" placeholder="Enter description of the item" name="description"
-							>{%if item%}{{item.description}}{%endif%}</textarea>
+							required="required">{%if item%}{{item.description}}{%endif%}</textarea>
 						</div>
 						<div class="form-group">
 							<label for="catalog_id">Catalog</label>

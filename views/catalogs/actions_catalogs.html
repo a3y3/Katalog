@@ -8,7 +8,7 @@
 				<form action="{{url_for('catalogs')}}" method="POST">
 					<div class="form-group">
 						<label for="name">Name</label>
-						<input type="name" id="name" class="form-control" aria-describedby="catalogName" placeholder="Enter name of the catalog" name="name" autocomplete="off" {%if catalog%}value="{{catalog.name}}"{%endif%} autofocus="on">
+						<input type="name" id="name" class="form-control" aria-describedby="catalogName" placeholder="Enter name of the catalog" name="name" autocomplete="off" {%if catalog%}value="{{catalog.name}}"{%endif%} autofocus="on" required="required">
 					</div>
 					<button type="submit" class="btn btn-primary" {%if catalog%} id="btn-submit-edit" {%endif%} >Submit</button>
 				</form>
